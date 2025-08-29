@@ -1,3 +1,4 @@
+#database
 import sqlite3
 
 DB_NAME = "budget.db"
