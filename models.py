@@ -2,7 +2,6 @@
 import sqlite3
 from database import get_connection, create_table
 
-# Ensure the table exists when this file is used
 create_table()
 
 def add_expense(name, amount):
