@@ -1,30 +1,38 @@
-# models.py
-import sqlite3
-from database import get_connection, create_table
+from sqlalchemy.orm import declarative_base, relationship
+from sqlalchemy import Column, Integer, String, Float, Date, ForeignKey, func
 
-create_table()
+Base = declarative_base()
 
-def add_expense(name, amount):
-    """Insert a new expense into the database."""
-    conn = get_connection()
-    cursor = conn.cursor()
-    cursor.execute("INSERT INTO expenses (name, amount) VALUES (?, ?)", (name, amount))
-    conn.commit()
-    conn.close()
+class User(Base):
+    __tablename__ = "users"
+    id = Column(Integer, primary_key=True)
+    name = Column(String(100), nullable=False)
 
-def view_expenses():
-    """Retrieve all expenses from the database."""
-    conn = get_connection()
-    cursor = conn.cursor()
-    cursor.execute("SELECT * FROM expenses")
-    rows = cursor.fetchall()
-    conn.close()
-    return rows
+    def __repr__(self):
+        return f"<User id={self.id} name={self.name!r}>"
 
-def delete_expense(expense_id):
-    """Delete an expense by its ID."""
-    conn = get_connection()
-    cursor = conn.cursor()
-    cursor.execute("DELETE FROM expenses WHERE id = ?", (expense_id,))
-    conn.commit()
-    conn.close()
+class Category(Base):
+    __tablename__ = "categories"
+    id = Column(Integer, primary_key=True)
+    name = Column(String(50), nullable=False, unique=True)
+
+    def __repr__(self):
+        return f"<Category id={self.id} name={self.name!r}>"
+
+class Expense(Base):
+    __tablename__ = "expenses"
+    id = Column(Integer, primary_key=True)
+    description = Column(String(255), nullable=False)
+    amount = Column(Float, nullable=False)
+    # store date as DATE; default to current date if not provided
+    date = Column(Date, server_default=func.current_date(), nullable=False)
+
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=True)
+    category_id = Column(Integer, ForeignKey("categories.id"), nullable=True)
+
+    user = relationship("User", backref="expenses")
+    category = relationship("Category", backref="expenses")
+
+    def __repr__(self):
+        return f"<Expense id={self.id} desc={self.description!r} amount={self.amount}>"
+
