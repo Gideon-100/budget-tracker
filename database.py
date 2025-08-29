@@ -1,23 +1,15 @@
-#database
-import sqlite3
+# database.py
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
+from models import Base
 
-DB_NAME = "budget.db"
+DB_URL = "sqlite:///budget.db"
 
-def get_connection():
-    """Create a database connection and return the connection object."""
-    conn = sqlite3.connect(DB_NAME)
-    return conn
 
-def create_table():
-    """Create expenses table if it does not exist."""
-    conn = get_connection()
-    cursor = conn.cursor()
-    cursor.execute("""
-        CREATE TABLE IF NOT EXISTS expenses (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            name TEXT NOT NULL,
-            amount REAL NOT NULL
-        )
-    """)
-    conn.commit()
-    conn.close()
+engine = create_engine(DB_URL, echo=False, future=True)
+SessionLocal = sessionmaker(bind=engine, future=True)
+
+def init_db():
+    """Create the SQLite DB file and tables (if they don't exist)."""
+    Base.metadata.create_all(engine)
+
